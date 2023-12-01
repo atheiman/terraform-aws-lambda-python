@@ -8,13 +8,12 @@ terraform {
 }
 
 data "aws_partition" "current" {}
-data "aws_caller_identity" "current" {}
 
 locals {
-  lambda_function_name  = "MyFunction"
-  lambda_runtime        = "python3.11"
-  lambda_root           = "${path.module}/lambda"
-  lambda_layer_root     = "${local.lambda_root}/layer"
+  lambda_function_name = "MyFunction"
+  lambda_runtime       = "python3.11"
+  lambda_root          = "${path.module}/lambda"
+  lambda_layer_root    = "${local.lambda_root}/layer"
   # Python deps should be zipped into a `/python/` directory
   # https://docs.aws.amazon.com/lambda/latest/dg/packaging-layers.html#packaging-layers-paths
   lambda_layer_lib_root = "${local.lambda_layer_root}/python"
@@ -22,8 +21,7 @@ locals {
 }
 
 resource "aws_iam_role" "lambda" {
-  # Terraform's "jsonencode" function converts a
-  # Terraform expression result to valid JSON syntax.
+  name_prefix = "Lambda-${local.lambda_function_name}-"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
