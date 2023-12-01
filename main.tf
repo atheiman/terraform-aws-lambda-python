@@ -10,10 +10,11 @@ terraform {
 data "aws_partition" "current" {}
 
 locals {
-  lambda_function_name = "MyFunction"
-  lambda_runtime       = "python3.11"
-  lambda_root          = "${path.module}/lambda"
-  lambda_layer_root    = "${local.lambda_root}/layer"
+  lambda_function_name          = "MyFunction"
+  lambda_runtime                = "python3.11"
+  lambda_root                   = "${path.module}/lambda"
+  lambda_layer_root             = "${local.lambda_root}/layer"
+  lambda_layer_requirements_txt = "${local.lambda_layer_root}/requirements.txt"
   # Python deps should be zipped into a `/python/` directory
   # https://docs.aws.amazon.com/lambda/latest/dg/packaging-layers.html#packaging-layers-paths
   lambda_layer_lib_root = "${local.lambda_layer_root}/python"
@@ -62,12 +63,13 @@ resource "aws_cloudwatch_log_group" "lambda" {
 
 resource "null_resource" "pip_install" {
   provisioner "local-exec" {
-    command = "pip install --quiet --quiet --requirement ${local.lambda_layer_root}/requirements.txt --target ${local.lambda_layer_lib_root}"
+    command = "pip install --quiet --quiet --requirement ${local.lambda_layer_requirements_txt} --target ${local.lambda_layer_lib_root}"
   }
 
   triggers = {
-    # always_run   = timestamp()
-    requirements = filemd5("${local.lambda_layer_root}/requirements.txt")
+    # Use this to force an update of pip dependencies
+    #always_run   = timestamp()
+    requirements = filemd5(local.lambda_layer_requirements_txt)
   }
 }
 
