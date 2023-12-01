@@ -1,0 +1,4 @@
+# boto3 is pre-installed in python lambda functions, but you can declare it here
+# to get a more recent version
+boto3~=1.33
+requests~=2.30
